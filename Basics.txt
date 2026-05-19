@@ -10,12 +10,25 @@ o COUNT(CASE WHEN condiƟon THEN 1 END)
  String/date basics: CONCAT, SUBSTRING, UPPER, LOWER, DATE_TRUNC, EXTRACT 
 
 
-///////////////////////////----SELECT-------/////////////////////////////
+///////////////////////////------------SELECT----------------/////////////////////////////
 SELECT column1, column2
 FROM table_name;
 
 Select statement can be used for selecting the columns , we could select one
 column, mulitple columns through separated commas, or the entire column select
+
+Purpose: Read-only → retrieves data from the table.
+
+It does not change the table itself.
+
+You can use expressions (CASE WHEN, ROUND, SUM, etc.) to transform or display data differently,
+ but the underlying table remains untouched.
+
+Think of it as creating a temporary result set (like a virtual table) that exists only while the
+ query runs.
+
+
+EG-:
 
 select col1,col2 FROM table_name
 select * FROM table_name
@@ -23,7 +36,9 @@ select * FROM table_name
 SELECT USECASE
 -To retrieve the columns from the table using FROM
 
-///////////////////////-------WHERE-------///////////////////////////////
+
+
+///////////////////////----------------WHERE--------------------///////////////////////////////
 used along with columns used to filter rows used for filtering purpose
 example-:
 SELECT *
@@ -41,20 +56,22 @@ WHERE USECASE
 -used for filtering of rows
 -to add CONDITIONS, for mulitple conditions use AND
 
-////////////////////---------ORDER BY--------------//////////////////////
+////////////////////--------------------ORDER BY--------------////////////////////////////////
 used to sort rows
 eg-:
 SELECT *
 FROM employees
 ORDER BY salary ASC/DESC;
 
-can sort multiple columns rows as well 
+can sort multiple columns rows as well , HERE first sort through salary and if it matches THEN
+id acts as second tier to sort them 
+
 SELECT *
 FROM employees
 ORDER BY salary,id ASC;
 
 
-/////////////////-----LIMIT------------------////////////////////////////
+/////////////////////--------------------LIMIT------------------////////////////////////////
 -gives this much rows as mentioned
 
 eg-:
@@ -63,7 +80,7 @@ FROM employees
 LIMIT 5;
 
 
-//////////////////////-------DISTINCT----------/////////////////////////////
+//////////////////////--------------------DISTINCT---------------/////////////////////////////
 -used to remove the duplicates 
 
 eg-:
@@ -110,19 +127,131 @@ SELECT CITY
 FROM STATION
 WHERE CITY LIKE '%shi%';
 
-/////////////////////////////////////////////////////////////////////////
-BETWEEN
 
-sql
+//////////////////////////-----------------IN----------------------////////////////////////////////
+
+-checks if a value is there in the list 
+eg-:
+SELECT *
+FROM employees
+WHERE department IN ('HR', 'Finance', 'IT');
+
+SELECT *
+FROM employees
+WHERE age IN (25, 30, 35);
+
+SELECT *
+FROM employees
+WHERE department NOT IN ('HR','Finance');  //when combined with NOT
+
+
+-it could be brought to use whenever we think of using mulitple times OR condition.
+
+/////////////////////////----------------BETWEEN-----------------///////////////////////////////
+-checks if a value lies between two boundaries INCLUSIVE
+
+
 SELECT *
 FROM employees
 WHERE age BETWEEN 25 AND 30;
-IS NULL / IS NOT NULL
 
-sql
+Same as age >= 25 AND age <= 30.
+
+
+////////////////////------IS NULL / IS NOT NULL-------////////////////////////////////
+-Checks for missing values.
+
+
+eg-:
 SELECT *
 FROM employees
 WHERE manager_id IS NULL;
+
+SELECT *
+FROM employees
+WHERE manager_id IS NOT NULL;
+
+
+
+/////////////////////////-----------COUNT----------------///////////////////////////////////////
+-count rows or non null values 
+
+eg-:
+-- Count all rows
+SELECT COUNT(*) AS employees FROM employees;
+
+-- Count only non-null salaries
+SELECT COUNT(salary) FROM employees;
+
+-- Count distinct departments
+SELECT COUNT(DISTINCT department) FROM employees;
+
+
+/////////////////////------SUM---------////////////////////////////////////////
+-add numeric values 
+
+eg-:
+SELECT SUM(salary) AS total_salary
+FROM employees;
+
+-- Conditional sum
+SELECT SUM(CASE WHEN department = 'HR' THEN salary ELSE 0 END) AS hr_salary
+FROM employees;
+
+
+SELECT SUM(CASE 
+              WHEN department = 'HR' THEN salary
+              WHEN department = 'IT' THEN salary * 0.9
+              ELSE 0 
+           END) AS adjusted_salary
+FROM employees;
+
+
+
+////////////////////////----AVG------//////////////////////////////////////
+-gives average
+
+eg-:
+SELECT AVG(salary) AS avg_salary
+FROM employees;
+
+-- Average only for IT department
+SELECT AVG(salary) AS avg_it_salary
+FROM employees
+WHERE department = 'IT';
+
+
+//////////////////////------MIN/MAX---------////////////////////////////////
+-find smallest or largest values
+
+eg-:
+SELECT MIN(salary) AS lowest_salary,
+       MAX(salary) AS highest_salary
+FROM employees;
+
+
+////////////////////------ROUND-------------////////////////////////////////
+-round numeric values
+
+eg-:
+SELECT ROUND(AVG(salary), 2) AS avg_salary_rounded
+FROM employees;
+
+ROUND(value, decimals)
+
+/////////////////---------AS---------------//////////////////////////////////////
+-used to create new column name
+AS is not required, but it’s recommended for readability.
+
+By default, aggregate functions like COUNT, SUM, AVG, MIN, MAX, ROUND will return a column 
+with a system‑generated name (like COUNT(1) or SUM(SALARY)), which looks messy.
+
+Using AS gives the result column a clear alias.
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 GROUP BY + HAVING
 
 sql
@@ -130,6 +259,8 @@ SELECT department, COUNT(*) AS emp_count
 FROM employees
 GROUP BY department
 HAVING COUNT(*) > 5;
+
+
 CASE WHEN (conditional logic)
 
 sql
@@ -142,8 +273,69 @@ FROM employees;
 
 //////////////////////////////////////////////////////////////////////////
 
+/////////////////////////--------PROBLEM--------///////////////////////////
+
+HackerRank Problems for Practice
+IN
+Revising the Select Query II
+Weather Observation Station 5 (cities starting with vowels)
+
+BETWEEN
+Weather Observation Station 2 (latitude between values)
+Weather Observation Station 12 (filter ranges)
+
+IS NULL / IS NOT NULL
+Weather Observation Station 11 (check for NULL values)
+Employee Details (sometimes requires filtering NULL manager IDs)
+
+COUNT
+Weather Observation Station 4 (difference between total and distinct CITY count)
+Weather Observation Station 9 (count cities not starting with vowels)
+
+SUM
+Population Census (sum of populations)
+African Cities (sum with joins)
+
+AVG
+Weather Observation Station 13 (average LAT_N)
+Weather Observation Station 14 (average LONG_W)
+
+MIN / MAX
+Weather Observation Station 6 (shortest and longest CITY names)
+Weather Observation Station 15 (min/max LAT_N)
+
+ROUND
+Weather Observation Station 17 (round average to 4 decimal places)
+Weather Observation Station 18 (round sum to 4 decimal places)
 
 
+///////////////////////-------------------------//////////////////////////////////////////     
+
+//////////////////////---------UPDATE------------/////////////////////////////////////////
+
+WORKING
+Purpose: Write operation → modifies the actual data stored in the table.
+Changes are permanent (unless rolled back in a transaction).
+Always use WHERE to avoid updating all rows unintentionally.
+
+eg-:
+UPDATE SALARY
+SET SEX=CASE
+         WHEN SEX='m' THEN 'f'
+         WHEN SEX='f' THEN 'm'
+
+END;
+
+//one column UPDATE
+UPDATE employees
+SET salary = 60000
+WHERE id = 101;
+
+//multiple columns UPDATE
+UPDATE employees
+SET salary = 70000,
+    department = 'Finance'
+WHERE id = 102;
 
 
 
